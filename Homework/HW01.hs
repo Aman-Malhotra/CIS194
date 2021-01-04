@@ -16,7 +16,7 @@ dropLastDigit num = num `div` 10
 
 toRevDigits :: Integer -> [Integer]
 toRevDigits num 
-    | num > 0           = lastDigit num : toRevDigits (dropLastDigit (num))
+    | num > 0           = lastDigit num : (toRevDigits . dropLastDigit) num
     | otherwise         = []
 
 -- Exercise 3 -----------------------------------------
@@ -25,8 +25,8 @@ toRevDigits num
 doubleEveryOther :: [Integer] -> [Integer]
 doubleEveryOther [] = []
 doubleEveryOther num_list
-    | length num_list > 1  = (head num_list): 2* (head (tail num_list)) : doubleEveryOther (tail (tail num_list))
-    | otherwise            = (head num_list): []
+    | length num_list > 1  = head num_list: 2* head (tail num_list) : (doubleEveryOther . tail .tail) num_list
+    | otherwise            = head num_list: []
 
 -- Exercise 4 -----------------------------------------
 
