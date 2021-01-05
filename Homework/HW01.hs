@@ -24,23 +24,19 @@ toRevDigits num
 -- Double every second number in a list starting on the left.
 doubleEveryOther :: [Integer] -> [Integer]
 doubleEveryOther [] = []
-doubleEveryOther num_list
-    | length num_list > 1  = head num_list: 2* head (tail num_list) : (doubleEveryOther . tail .tail) num_list
-    | otherwise            = head num_list: []
+doubleEveryOther (x:y:xs) = x: 2*y : doubleEveryOther xs
+doubleEveryOther (x:_) = [x]
 
 -- Exercise 4 -----------------------------------------
 
 getSumOfDigits :: Integer -> Integer
 getSumOfDigits n
-    | n>10              = (n `mod` 10) + (n `div` 10)
+    | n>10              = (n `mod` 10) + getSumOfDigits (n `div` 10)
     | otherwise         = n
 
 -- Calculate the sum of all the digits in every Integer.
 sumDigits :: [Integer] -> Integer
-sumDigits [] = 0
-sumDigits num_list = getSumOfDigits (head num_list) + sumDigits (tail num_list)
-
-
+sumDigits = foldr ((+) . getSumOfDigits) 0
 
 -- Exercise 5 -----------------------------------------
 
