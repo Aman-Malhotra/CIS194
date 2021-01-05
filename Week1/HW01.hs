@@ -1,4 +1,4 @@
-module Homework.HW01 where
+module Week1.HW01 where
 
 -- Homework Url https://www.cis.upenn.edu/~cis194/spring15/hw/01-intro.pdf
 
