@@ -62,13 +62,12 @@ getMove c1 c2 = Move c2 exMatch (matches c1 c2 - exMatch)
 -- Exercise 4 -----------------------------------------
 
 isConsistent :: Move -> Code -> Bool
-isConsistent (Move c1 ex non_ex) c2 = ex == ex_1 && non_ex == non_ex_1
-    where Move _ ex_1 non_ex_1 = getMove c1 c2
+isConsistent mv@(Move guess _ _) code = mv == getMove code guess
 
 -- Exercise 5 -----------------------------------------
 
 filterCodes :: Move -> [Code] -> [Code]
-filterCodes = undefined
+filterCodes = filter . isConsistent 
 
 -- Exercise 6 -----------------------------------------
 
