@@ -3,6 +3,7 @@
 module Week2.HW02 where 
 
 -- Mastermind -----------------------------------------
+-- https://www.cis.upenn.edu/~cis194/spring15/hw/02-lists.pdf
 
 -- A peg can be one of six colors
 data Peg = Red | Green | Blue | Yellow | Orange | Purple
@@ -54,10 +55,10 @@ matches (c1:c1x) (c2:c2x) = getMatchCount (countColors (c1:c1x)) (countColors (c
 
 -- Exercise 3 -----------------------------------------
 
--- Construct a Move from a guess given the actual code
+-- Construct a Move from a guess given the secret
 getMove :: Code -> Code -> Move
-getMove c1 c2 = Move c2 exMatch (matches c1 c2 - exMatch)
-    where   exMatch = exactMatches c1 c2
+getMove sec move = Move move exMatch (matches sec move - exMatch)
+    where   exMatch = exactMatches sec move
 
 -- Exercise 4 -----------------------------------------
 
@@ -71,15 +72,30 @@ filterCodes = filter . isConsistent
 
 -- Exercise 6 -----------------------------------------
 
-allCodes :: Int -> [Code]
-allCodes = undefined
+-- I wasnt able to solve get this one on my own 
+
+allCodesHelper :: Code -> [Code]
+allCodesHelper code = map (:code) colors
+
+allCodes :: (Code -> [Code]) -> Int -> [Code]
+allCodes _          0 = [[]]
+allCodes addColorFn n
+  | n > 0     = concatMap addColorFn nxtCodes
+  | otherwise = [[]]
+  where
+    nxtCodes  = allCodes addColorFn $ n-1  
+                  
 
 -- Exercise 7 -----------------------------------------
+solveHelper :: Code -> [Code] -> [Move]
+solveHelper _                    [] = []
+solveHelper secret (guess:remCodes) = move: nextAllowedCodes
+  where
+    move               = getMove secret guess
+    getFilteredCodes   = filterCodes move remCodes
+    nextAllowedCodes   = solveHelper secret getFilteredCodes
+
 
 solve :: Code -> [Move]
-solve = undefined
-
--- Bonus ----------------------------------------------
-
-fiveGuess :: Code -> [Move]
-fiveGuess = undefined
+solve secretCode      = solveHelper secretCode getAllCodes
+  where getAllCodes   = allCodes allCodesHelper $ length secretCode
