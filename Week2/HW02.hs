@@ -72,7 +72,7 @@ filterCodes = filter . isConsistent
 
 -- Exercise 6 -----------------------------------------
 
--- I wasnt able to solve get this one on my own 
+-- I wasnt able to solve this one on my own 
 
 allCodesHelper :: Code -> [Code]
 allCodesHelper code = map (:code) colors
