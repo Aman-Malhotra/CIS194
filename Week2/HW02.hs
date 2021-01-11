@@ -2,6 +2,8 @@
 
 module Week2.HW02 where 
 
+import Data.Bool 
+
 -- Mastermind -----------------------------------------
 -- https://www.cis.upenn.edu/~cis194/spring15/hw/02-lists.pdf
 
@@ -27,11 +29,15 @@ colors = [Red, Green, Blue, Yellow, Orange, Purple]
 
 -- Example: exactMatches [Red, Blue, Green, Yellow] [Blue, Green, Yellow, Red] == 0
 -- Example: exactMatches [Red, Blue, Green, Yellow] [Red, Purple, Green, Orange] == 2
+-- exactMatches :: Code -> Code -> Int
+-- exactMatches [] [] = 0 
+-- exactMatches [] _ = 0
+-- exactMatches _ [] = 0
+-- exactMatches (c1:xs) (c2:ys) = (if c1 == c2 then 1 else 0) + exactMatches xs ys
+
+-- better solution
 exactMatches :: Code -> Code -> Int
-exactMatches [] [] = 0 
-exactMatches [] _ = 0
-exactMatches _ [] = 0
-exactMatches (c1:xs) (c2:ys) = (if c1 == c2 then 1 else 0) + exactMatches xs ys
+exactMatches a b = sum $ zipWith (\x y -> bool 0 1 (x==y)) a b
 
 -- Exercise 2 -----------------------------------------
 
@@ -72,8 +78,6 @@ filterCodes = filter . isConsistent
 
 -- Exercise 6 -----------------------------------------
 
--- I wasnt able to solve this one on my own 
-
 allCodesHelper :: Code -> [Code]
 allCodesHelper code = map (:code) colors
 
@@ -84,7 +88,22 @@ allCodes addColorFn n
   | otherwise = [[]]
   where
     nxtCodes  = allCodes addColorFn $ n-1  
+
+
+
+-- Explaination - https://github.com/Aman-Malhotra/CIS194/pull/2#discussion_r554878164
+-- OR -----
+-- prependEachColorToEachList :: [[Peg]] -> [[Peg]]
+-- prependEachColorToEachList listOfListsOfPegs = concatMap (\pegs -> fmap (\p -> p:pegs) colors) listOfListsOfPegs
+
+-- allCodes 0 = [[]]
+-- allCodes n 
+--     | n < 0 = [[]]
+--     | otherwise = prependEachColorToEachList (allCodes (n-1))
                   
+-- OR -----
+-- import Control.Monad
+-- allCodes n = replicateM  n colors
 
 -- Exercise 7 -----------------------------------------
 solveHelper :: Code -> [Code] -> [Move]
