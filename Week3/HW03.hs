@@ -1,5 +1,7 @@
 module HW03 where
 
+-- https://www.cis.upenn.edu/~cis194/spring15/hw/03-ADTs.pdf
+
 import Data.Bool
 
 data Expression =
