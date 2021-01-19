@@ -38,7 +38,7 @@ type State = String -> Int
 -- Exercise 1 -----------------------------------------
 
 extend :: State -> String -> Int -> State
-extend initState name val a             = bool (initState a) val (a == name)
+extend initState insertedName insertedVal             = \name -> bool (initState name) insertedVal (name == insertedName)
 
 empty :: State
 empty _                                 = 0
@@ -50,6 +50,7 @@ toInt b = if b then 1 else 0
 
 evalE :: State -> Expression -> Int
 evalE _ (Val a) = a 
+evalE initState (Var x) = initState x
 evalE initState (Op exp1 bop exp2) = 
   let a = evalE initState exp1 
       b = evalE initState exp2
@@ -63,7 +64,6 @@ evalE initState (Op exp1 bop exp2) =
         Lt              -> toInt $ a < b
         Le              -> toInt $ a <= b 
         Eql             -> toInt $ a == b
-evalE _ _ = 0
 
 -- Exercise 3 -----------------------------------------
 
@@ -81,16 +81,16 @@ desugar (If exp1 st1 st2)               = DIf exp1 (desugar st1) (desugar st2)
 desugar (Sequence st1 st2)              = DSequence (desugar st1) (desugar st2)
 desugar (While exp1 st1)                = DWhile exp1 (desugar st1)
 desugar (For ini cond incr body)        = DSequence (desugar ini) (DWhile cond (DSequence (desugar body) (desugar incr)))
-desugar _                               = undefined
+desugar Skip                            = DSkip
 
 -- Exercise 4 -----------------------------------------
 
 evalSimple :: State -> DietStatement -> State
 evalSimple initState (DAssign name exp1)       = extend initState name (evalE initState exp1)
-evalSimple initState (DIf check st1 st2)       = evalSimple initState (if evalE initState check == 1 then st1 else st2)
-evalSimple initState (DWhile exp1 st1)         = if evalE initState exp1 == 1 then evalSimple initState st1 else initState
+evalSimple initState (DIf check st1 st2)       = evalSimple initState (if evalE initState check /= 0 then st1 else st2)
+evalSimple initState (DWhile exp1 st1)         = if evalE initState exp1 /= 0 then evalSimple initState (DSequence st1 (DWhile exp1 st1)) else initState
 evalSimple initState (DSequence st1 st2)       = evalSimple (evalSimple initState st1) st2
-evalSimple _ _                                 = empty
+evalSimple initState DSkip                     = initState
 
 run :: State -> Statement -> State
 run initState st1 = evalSimple initState (desugar st1)
