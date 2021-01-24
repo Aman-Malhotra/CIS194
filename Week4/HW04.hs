@@ -118,11 +118,11 @@ instance Num a             => Num (Poly a) where
 
 -- Exercise 7 -----------------------------------------
 
-applyP :: Num a => Poly a -> a -> a
-applyP (P p) valX = sum $ zipWith (\a b -> a * (valX ^ b)) p intList
+applyP :: Num a            => Poly a -> a -> a
+applyP (P p) valX          = sum $ zipWith (\a b -> a * (valX ^ b)) p intList
     where 
         intList :: [Int]
-        intList = [0..]
+        intList            = [0..]
 
 -- Exercise 8 -----------------------------------------
 
@@ -136,10 +136,14 @@ class Num a => Differentiable a where
 
 getDerivConst :: (Num a, Eq a) => a -> a -> a
 getDerivConst c e
-    | e == 0    = 0
-    | otherwise = c * e
+    | e == 0               = 0
+    | otherwise            = c * e
 
 instance (Num a, Enum a, Eq a) => Differentiable (Poly a) where
-    deriv (P p) = P $ zipWith getDerivConst (tail p) intList
+    deriv (P [])            = P [0]
+    deriv (P [_])           = P [0]
+    deriv (P (_:ps))        = P $ zipWith getDerivConst ps intList
             where 
-                intList = [1..]
+                intList     = [1..]
+    
+    
