@@ -1,5 +1,8 @@
 {-# OPTIONS_GHC -Wall #-}
-module HW04 where
+
+-- https://www.cis.upenn.edu/~cis194/spring15/hw/04-typeclasses.pdf
+
+module Week4.HW04 where
 
 import Data.List (dropWhileEnd)
 newtype Poly a = P [a]
@@ -30,7 +33,7 @@ showHelper (P (p:ps)) e c
     | p == 0                = showHelper (P ps) (e-1) (c+1)
     | e == 0                = leadingPlus ++ show p 
     -- I was trying to get nested guards here instead of using [if-then-else] or [case] but wasnt able to 
-    | e == 1                = leadingNum ++ "x"  ++ showHelper (P ps) (e-1) (c+1)
+    | e == 1                = leadingPlus ++ leadingNum ++ "x"  ++ showHelper (P ps) (e-1) (c+1)
     | otherwise             = leadingPlus ++ leadingNum ++ "x^" ++ show e ++ showHelper (P ps) (e-1) (c+1)
     where 
         leadingPlus         = case c of 
@@ -116,10 +119,14 @@ instance Num a             => Num (Poly a) where
 -- Exercise 7 -----------------------------------------
 
 applyP :: Num a => Poly a -> a -> a
-applyP = undefined
+applyP (P p) valX = sum $ zipWith (\a b -> a * (valX ^ b)) p intList
+    where 
+        intList :: [Int]
+        intList = [0..]
 
 -- Exercise 8 -----------------------------------------
 
+-- I wasnt able to understand what is nderiv here so this is the only exc left in this weeks assignment 
 class Num a => Differentiable a where
     deriv  :: a -> a
     nderiv :: Int -> a -> a
@@ -127,5 +134,12 @@ class Num a => Differentiable a where
 
 -- Exercise 9 -----------------------------------------
 
-instance Num a => Differentiable (Poly a) where
-    deriv = undefined
+getDerivConst :: (Num a, Eq a) => a -> a -> a
+getDerivConst c e
+    | e == 0    = 0
+    | otherwise = c * e
+
+instance (Num a, Enum a, Eq a) => Differentiable (Poly a) where
+    deriv (P p) = P $ zipWith getDerivConst (tail p) intList
+            where 
+                intList = [1..]
