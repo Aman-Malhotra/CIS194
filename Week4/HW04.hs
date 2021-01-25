@@ -5,6 +5,7 @@
 module Week4.HW04 where
 
 import Data.List (dropWhileEnd)
+
 newtype Poly a = P [a]
 
 -- Exercise 1 -----------------------------------------
@@ -28,25 +29,27 @@ instance (Num a, Eq a)              => Eq (Poly a) where
 
 -- e == exponent 
 -- c == count of the polynomial term, is it first, second, third and so on
-showHelper :: (Num a, Show a, Eq a) => Poly a -> Int -> Int -> String
+showHelper :: (Num a, Show a, Eq a, Ord a) => Poly a -> Int -> Int -> String
 showHelper (P (p:ps)) e c
     | p == 0                = showHelper (P ps) (e-1) (c+1)
     | e == 0                = leadingPlus ++ show p 
-    -- I was trying to get nested guards here instead of using [if-then-else] or [case] but wasnt able to 
     | e == 1                = leadingPlus ++ leadingNum ++ "x"  ++ showHelper (P ps) (e-1) (c+1)
     | otherwise             = leadingPlus ++ leadingNum ++ "x^" ++ show e ++ showHelper (P ps) (e-1) (c+1)
     where 
-        leadingPlus         = case c of 
-                0           -> "" 
-                _           -> " + "
-        leadingNum          = case p of 
-                1           -> ""
-                anyP        -> show anyP
-
+        leadingPlus         
+            | p < 0         = " - "
+            | c == 0        = "" 
+            | p > 0         = " + "
+            | otherwise     = " + "
+        leadingNum          
+            | p == 1        = "" 
+            | p == -1       = ""
+            | p < 0         = show $ negate p
+            | otherwise     = show p
 
 showHelper (P []) _ _       = ""
 
-instance (Num a, Eq a, Show a) => Show (Poly a) where
+instance (Num a, Eq a, Show a, Ord a) => Show (Poly a) where
     show (P p) = 
         showHelper (P $ reverse withoutTrailingZeros ) (length withoutTrailingZeros - 1) 0
             where 
@@ -96,20 +99,18 @@ getAllTimes n (P (p:ps)) q  = timesHelper q p n :  getAllTimes (n+1) (P ps) q
 --      [1, 5, 8, 10, 4]
 --      ---------------
 addAllTimes :: (Num a)      => [Poly a] -> Poly a
-addAllTimes []              = P []
-addAllTimes [p1]            = p1
-addAllTimes [p1, p2]        = plus p1 p2
-addAllTimes (p1:p2:ps)      = plus p1 p2 + addAllTimes ps
+addAllTimes                 = foldr (+) (P [])
 
 times :: (Num a)            => Poly a -> Poly a -> Poly a
-times p q                   = addAllTimes $ getAllTimes 0 p q
+times p q                   = addAllTimes (getAllTimes 0 p q)
 
 -- Exercise 6 -----------------------------------------
 
 instance Num a             => Num (Poly a) where
     (+)                    = plus
     (*)                    = times
-    negate                 = (* P [-1])
+    -- negate                 = (* P [-1])
+    negate  (P a)           = P $ map negate a
     fromInteger i          = P [fromInteger i]
 
     -- No meaningful definitions exist
@@ -134,15 +135,10 @@ class Num a => Differentiable a where
 
 -- Exercise 9 -----------------------------------------
 
-getDerivConst :: (Num a, Eq a) => a -> a -> a
-getDerivConst c e
-    | e == 0               = 0
-    | otherwise            = c * e
-
 instance (Num a, Enum a, Eq a) => Differentiable (Poly a) where
     deriv (P [])            = P [0]
     deriv (P [_])           = P [0]
-    deriv (P (_:ps))        = P $ zipWith getDerivConst ps intList
+    deriv (P (_:ps))        = P $ zipWith (*) ps intList
             where 
                 intList     = [1..]
     
