@@ -19,11 +19,7 @@ instance (Num a, Eq a)              => Eq (Poly a) where
     -- This will not be effecient way of doing it I think,
     -- because its taking extra storage to save the new list 
     -- without trailing zeros and then does the matching
-    P a == P b                      = withoutTrailingZerosA == withoutTrailingZerosB
-        where 
-            withoutTrailingZerosA   = dropWhileEnd (== 0) a 
-            withoutTrailingZerosB   =  dropWhileEnd (== 0) b
-        
+    P a == P b                      = dropWhileEnd (== 0) a == dropWhileEnd (== 0) b
 
 -- Exercise 3 -----------------------------------------
 
@@ -46,14 +42,15 @@ showHelper (P (p:ps)) e c
             | p == -1       = ""
             | p < 0         = show $ negate p
             | otherwise     = show p
-
 showHelper (P []) _ _       = ""
 
 instance (Num a, Eq a, Show a, Ord a) => Show (Poly a) where
-    show (P p) = 
-        showHelper (P $ reverse withoutTrailingZeros ) (length withoutTrailingZeros - 1) 0
-            where 
-                withoutTrailingZeros = dropWhileEnd (==0) p
+    show (P p) 
+        | null p            = "0"
+        | otherwise         = 
+            showHelper (P withoutTrailingZeros ) (length withoutTrailingZeros - 1) 0
+                where 
+                    withoutTrailingZeros = reverse $ dropWhileEnd (==0) p
 
 -- Exercise 4 -----------------------------------------
 
@@ -110,6 +107,7 @@ instance Num a             => Num (Poly a) where
     (+)                    = plus
     (*)                    = times
     -- negate                 = (* P [-1])
+    -- OR
     negate  (P a)           = P $ map negate a
     fromInteger i          = P [fromInteger i]
 
