@@ -84,7 +84,6 @@ timesHelper (P p) c e       = P $ replicate e 0 ++ map (*c) p
 -- getAllTimes 0 (P [1, 1, 2]) (P [1, 4, 2]) == [P [1, 4, 2], P [0, 1, 4, 2], P [0, 0, 2, 8, 4]]
 getAllTimes ::  (Num a)     => Int -> Poly a -> Poly a -> [Poly a]
 getAllTimes _ (P []) _      = []
-getAllTimes n (P [p]) q     = [timesHelper q p n]
 getAllTimes n (P (p:ps)) q  = timesHelper q p n :  getAllTimes (n+1) (P ps) q
 
 -- addAllTimes [P [1, 4, 2], P [0, 1, 4, 2], P [0, 0, 2, 8, 4]] == P [1, 5, 8, 10, 4]
@@ -129,7 +128,9 @@ applyP (P p) valX          = sum $ zipWith (\a b -> a * (valX ^ b)) p intList
 class Num a => Differentiable a where
     deriv  :: a -> a
     nderiv :: Int -> a -> a
-    nderiv = undefined
+    nderiv n 
+        | n <= 0            = id
+        | otherwise         = deriv . nderiv (n-1) 
 
 -- Exercise 9 -----------------------------------------
 
