@@ -9,28 +9,42 @@ import System.Environment (getArgs)
 import qualified Data.ByteString.Lazy as BS
 -- import qualified Data.Map.Strict as Map
 
-import Week5.Parser ( FromJSON, ToJSON, Transaction, TId )
+import Week5.Parser ( FromJSON(..), decode, encode )
 
 -- Exercise 1 -----------------------------------------
 
+-- To run in GHCI:
+-- getSecret "Week5/clues/dog-original.jpg" "Week5/clues/dog.jpg"
+
 getSecret :: FilePath -> FilePath -> IO ByteString
 getSecret dog1 dog2 = do
-      bytesDog1 <- BS.readFile dog1
-      bytesDog2 <- BS.readFile dog2
-      let wordsArray = BS.zipWith xor bytesDog1 bytesDog2 
-      let nonNullWordArray = filter (/=0) wordsArray
-      -- print nonNullWordArray
-      pure $ BS.pack nonNullWordArray
+  bytesDog1 <- BS.readFile dog1
+  bytesDog2 <- BS.readFile dog2
+  let word8Array = BS.zipWith xor bytesDog1 bytesDog2 
+  let nonNullWord8Array = filter (/=0) word8Array
+  let byteString = BS.pack nonNullWord8Array
+  pure byteString
+  -- idk why m using pure here, 
+  -- i was looking at mhaven backend and saw this being used to return values from functions,
+  -- is there any other reason behind this and when specifically to use it
 
 -- Exercise 2 -----------------------------------------
 
+-- To run in GHCI:
+-- secret <- getSecret "Week5/clues/dog-original.jpg" "Week5/clues/dog.jpg"
+-- decryptWithKey secret "Week5/clues/victims.json"
+
 decryptWithKey :: ByteString -> FilePath -> IO ()
-decryptWithKey = undefined
+decryptWithKey secret filePath = do
+  encriptedFileByteString <- BS.readFile $ filePath++".enc"
+  let decryptedWrod8Array = BS.zipWith xor ((BS.pack . cycle . BS.unpack) secret) encriptedFileByteString
+  let byteString = BS.pack decryptedWrod8Array
+  BS.writeFile filePath byteString
 
--- -- Exercise 3 -----------------------------------------
+-- Exercise 3 -----------------------------------------
 
--- parseFile :: FromJSON a => FilePath -> IO (Maybe a)
--- parseFile = undefined
+parseFile :: FromJSON a => FilePath -> IO (Maybe a)
+parseFile = (decode <$>) . BS.readFile 
 
 -- -- Exercise 4 -----------------------------------------
 
